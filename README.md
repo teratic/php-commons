@@ -12,7 +12,7 @@ PHP Commons are a set of common utility classes and functions.
 
 ## Requirements
 
-Commons requires PHP 5.3+.
+Commons requires PHP 5.4+.
 
 ## Installation
 
