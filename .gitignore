@@ -1,0 +1,7 @@
+vendor
+composer.lock
+build
+node_modules
+
+# Ignore files from IDEs
+.idea
