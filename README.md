@@ -1,4 +1,4 @@
-# Config
+# PHP Commons
 
 [![Latest version][ico-version]][link-packagist]
 [![Software License][ico-license]][link-license]
@@ -8,8 +8,7 @@
 [![Total Downloads][ico-downloads]][link-downloads]
 [![Gitter][ico-gitter]][link-gitter]
 
-Config is a file configuration loader that supports PHP, INI, XML, JSON,
-and YML files.
+PHP Commons are a set of common utility classes and functions.
 
 ## Requirements
 
