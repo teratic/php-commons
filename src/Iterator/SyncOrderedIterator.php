@@ -97,58 +97,50 @@ class SyncOrderedIterator implements Iterator
     {
         $left = $this->left;
         $right = $this->right;
-        $operation = null;
+        $this->operation = null;
 
-        while (($left->valid() || $right->valid()) && !$operation) {
+        if (($left->valid() || $right->valid())) {
             if (!$left->valid()) {
                 // If left is exausted
-                $operation = $this->getOperation(self::LEFT_MISSING);
+                $this->operation = $this->getOperation(self::LEFT_MISSING);
                 $right->next();
-
-            } else if (!$right->valid()) {
+                return;
+            }
+            if (!$right->valid()) {
                 // If right is exausted
-                $operation = $this->getOperation(self::RIGHT_MISSING);
+                $this->operation = $this->getOperation(self::RIGHT_MISSING);
                 $left->next();
-
-            } else {
-                // Compare items
-                if ($callback = $this->keyCmpCallback) {
-                    $cmp = $callback($left, $right);
-                } else {
-                    $lItem = $left->current();
-                    $rItem = $right->current();
-                    $cmp = ($lItem === $rItem ? 0 : (($lItem < $rItem) ? -1 : 1));
-                }
-
-                if ($cmp < 0) {
-                    // If left precedes right
-                    $operation = $this->getOperation(self::RIGHT_MISSING);
-                    $left->next();
-                } else if ($cmp > 0) {
-                    // right precedes left
-                    $operation = $this->getOperation(self::LEFT_MISSING);
-                    $right->next();
-                } else {
-                    // Equal items
-                    $equals = true;
-                    if ($callback = $this->valueEqualsCallback) {
-                        $equals = $callback($left, $right);
-                    }
-
-                    $operation = $this->getOperation($equals ? self::EQUAL : self::NOT_EQUAL);
-
-                    $left->next();
-                    $right->next();
-                }
+                return;
             }
 
-        }
 
-        $this->operation = $operation;
-        if ($operation) {
-            $this->key++;
+            // Compare items
+            if ($callback = $this->keyCmpCallback) {
+                $cmp = $callback($left, $right);
+            } else {
+                $lItem = $left->current();
+                $rItem = $right->current();
+                $cmp = ($lItem === $rItem ? 0 : (($lItem < $rItem) ? -1 : 1));
+            }
+            // Create operations
+            if ($cmp < 0) {
+                // If left precedes right
+                $this->operation = $this->getOperation(self::RIGHT_MISSING);
+                $left->next();
+                return;
+            }
+            if ($cmp > 0) {
+                // right precedes left
+                $this->operation = $this->getOperation(self::LEFT_MISSING);
+                $right->next();
+                return;
+            }
+            // Equal items
+            $equals = ($callback = $this->valueEqualsCallback) ? $callback($left, $right) : true;
+            $this->operation = $this->getOperation($equals ? self::EQUAL : self::NOT_EQUAL);
+            $left->next();
+            $right->next();
         }
-
     }
 
     /**
@@ -210,15 +202,6 @@ class SyncOrderedIterator implements Iterator
                 ];
                 break;
             case self::EQUAL:
-                $op['left'] = [
-                    'key' => $this->left->key(),
-                    'value' => $this->left->current()
-                ];
-                $op['right'] = [
-                    'key' => $this->right->key(),
-                    'value' => $this->right->current()
-                ];
-                break;
             case self::NOT_EQUAL:
                 $op['left'] = [
                     'key' => $this->left->key(),
@@ -231,6 +214,7 @@ class SyncOrderedIterator implements Iterator
                 break;
         }
 
+        $this->key++;
         return $op;
     }
 }
