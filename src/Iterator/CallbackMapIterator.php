@@ -63,7 +63,7 @@ class CallbackMapIterator extends IteratorIterator
     {
         // Avoid call the callback more than once
         if (!$this->current && parent::valid()) {
-            $this->current = ($this->callback)(parent::current(), parent::key(), $this);
+            $this->current = call_user_func($this->callback, parent::current(), parent::key(), $this);
         }
 
         return $this->current;
